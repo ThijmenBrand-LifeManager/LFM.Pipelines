@@ -48,7 +48,7 @@ jobs:
         if: ${{ always() }}
 
   analyse:
-    uses: ./sonar-qube.yml
+    uses: ./.github/workflows/sonar-qube.yml
     with:
       solution-file: ${{ inputs.solution-file }}
     secrets: inherit

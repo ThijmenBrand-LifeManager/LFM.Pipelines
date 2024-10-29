@@ -89,4 +89,4 @@ jobs:
           context: "{{defaultContext}}:${{ inputs.project-path}}"
           file: ${{ matrix.value }}
           push: true
-          tags: ${{ env.REGISTRY }}/${{ env.REPO }}/${{ steps.set_image_name.outputs.image_name }}:${{ steps.set_version.outputs.version }}
+          tags: ${{ env.REGISTRY }}/${{ env.REPO }}/${{ steps.set_image_name.outputs.image_name }}:${{ inputs.environment }}

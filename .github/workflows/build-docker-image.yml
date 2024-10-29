@@ -78,7 +78,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: ${{ inputs.dockerfile-path }}
+          file: ${{ matrix.value }}
           push: true
           tags: |
             ${{ steps.set_image_name.outputs.image_name }}:${{ steps.set_version.outputs.version }}

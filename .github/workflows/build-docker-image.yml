@@ -3,6 +3,12 @@ name: build-dockerimage
 on:
   workflow_call:
     inputs:
+      project-path:
+        description: |-
+          The path to the project to build. You can put in
+          multiple project paths to build multiple images.
+        required: true
+        type: string
       dockerfile-path:
         description: |-
           The path to the Dockerfile to build. You can put in
@@ -80,7 +86,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
-          context: "{{defaultContext}}:LFM.Authorization"
+          context: "{{defaultContext}}:${{ inputs.project-path}}"
           file: ${{ matrix.value }}
           push: true
           tags: |

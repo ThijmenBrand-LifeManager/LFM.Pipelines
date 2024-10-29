@@ -61,9 +61,8 @@ jobs:
           image_name="${repository_name}-${app_name}"
           echo "image_name=$image_name" >> "$GITHUB_OUTPUT"
 
-      - name: Echo image name
-        run: |
-          echo "${{ steps.set_image_name.outputs.image_name }}"
+      - name: Repo name to lowercase
+        run: echo "REPO=${GITHUB_REPOSITORY@L}" >> "${GITHUB_ENV}"
 
       - uses: actions/checkout@v2
 
@@ -86,4 +85,4 @@ jobs:
           context: "{{defaultContext}}:${{ inputs.project-path}}"
           file: ${{ matrix.value }}
           push: true
-          tags: ${{ env.REGISTRY }}/${{ github.repository }}/${{ steps.set_image_name.outputs.image_name }}:${{ steps.set_version.outputs.version }}
+          tags: ${{ env.REGISTRY }}/${{ env.REPO }}/${{ steps.set_image_name.outputs.image_name }}:${{ steps.set_version.outputs.version }}

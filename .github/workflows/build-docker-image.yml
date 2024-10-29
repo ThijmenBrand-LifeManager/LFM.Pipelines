@@ -60,9 +60,15 @@ jobs:
         id: set_image_name
         run: |
           repository_name=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]' | tr '.' '-' | tr '/' '-')
-          dockerfile_base=$(basename "${{ inputs.dockerfile-path }}" | cut -d. -f1)
-          image_name="${dockerfile_base}-${repository_name}"
+          matrix_value="${{ matrix.value }}"
+          last_section=$(basename "$matrix_value")
+          app_name=$(echo "$last_section" | cut -d. -f1 | cut -d- -f1)
+          image_name="${repository_name}-${app_name}"
           echo "image_name=$image_name" >> "$GITHUB_OUTPUT"
+
+      - name: Echo image name
+        run: |
+          echo "${{ steps.set_image_name.outputs.image_name }}"
 
       - name: Build and push
         uses: docker/build-push-action@v6

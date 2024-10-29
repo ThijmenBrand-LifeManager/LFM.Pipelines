@@ -24,7 +24,7 @@ jobs:
       - id: matrix
         run: |
           dockerfile_paths="${{ inputs.dockerfile-path }}"
-          dockerfile_paths_array=$(echo "$dockerfile_paths" | awk 'BEGIN{ORS=""; print "value=["} {gsub(/"/, "\\\""); printf "\"%s\", ", $0} END{print "]"}' | sed 's/, ]/]/')
+          dockerfile_paths_array=$(echo "$dockerfile_paths" | awk 'BEGIN{ORS=""; print "["} {gsub(/"/, "\\\""); printf "\"%s\", ", $0} END{print "]"}' | sed 's/, ]/]/')
           echo "value=$dockerfile_paths_array" >> $GITHUB_OUTPUT
       - run: |
           echo "${{ steps.matrix.outputs.value }}"

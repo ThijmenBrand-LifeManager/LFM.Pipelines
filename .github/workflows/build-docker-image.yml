@@ -61,8 +61,11 @@ jobs:
         run: |
           repository_name=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]' | tr '.' '-' | tr '/' '-')
           matrix_value="${{ matrix.value }}"
+          echo "$matrix_value"
           last_section=$(basename "$matrix_value")
+          echo "$last_section"
           app_name=$(echo "$last_section" | cut -d. -f1 | cut -d- -f1)
+          echo "$app_name"
           image_name="${repository_name}-${app_name}"
           echo "image_name=$image_name" >> "$GITHUB_OUTPUT"
 

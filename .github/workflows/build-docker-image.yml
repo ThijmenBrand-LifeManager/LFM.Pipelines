@@ -70,6 +70,10 @@ jobs:
         run: |
           echo "${{ steps.set_image_name.outputs.image_name }}"
 
+      - name: Run LS
+        run: |
+          ls
+
       - name: Build and push
         uses: docker/build-push-action@v6
         with:

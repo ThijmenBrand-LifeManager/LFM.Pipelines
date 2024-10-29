@@ -59,7 +59,7 @@ jobs:
       - name: Set image name
         id: set_image_name
         run: |
-          repository_name=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]' | tr '.' '-')
+          repository_name=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]' | tr '.' '-' | tr '/' '-')
           dockerfile_base=$(basename "${{ inputs.dockerfile-path }}" | cut -d. -f1)
           image_name="${dockerfile_base}-${repository_name}"
           echo "image_name=$image_name" >> "$GITHUB_OUTPUT"

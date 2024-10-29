@@ -18,6 +18,9 @@ on:
       environment:
         required: true
         type: string
+    secrets:
+      IMAGE_PUBLISHER_TOKEN:
+        required: true
 env:
   PACKAGE_VERSION: $(date +'%Y.%m.%d').$(echo $GITHUB_RUN_NUMBER | cut -c1-7)
   REGISTRY: ghcr.io
@@ -77,7 +80,7 @@ jobs:
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          password: ${{ secrets.IMAGE_PUBLISHER_TOKEN }}
 
       - name: Build and push
         uses: docker/build-push-action@v6
@@ -85,4 +88,4 @@ jobs:
           context: "{{defaultContext}}:${{ inputs.project-path}}"
           file: ${{ matrix.value }}
           push: true
-          tags: ${{ env.REGISTRY }}/${{ env.REPO }}
+          tags: ${{ env.REGISTRY }}/${{ env.REPO }}/${{ steps.set_image_name.outputs.image_name }}:${{ steps.set_version.outputs.version }}

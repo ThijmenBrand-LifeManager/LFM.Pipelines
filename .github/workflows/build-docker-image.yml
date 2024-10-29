@@ -51,6 +51,11 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Set version
+        id: set_version
+        run: |
+          echo "version=$(date +'%Y.%m.%d').$(echo $GITHUB_RUN_NUMBER | cut -c1-7)" >> "$GITHUB_OUTPUT"
+
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
@@ -58,5 +63,5 @@ jobs:
           file: ${{ inputs.dockerfile-path }}
           push: true
           tags: |
-            ${{ github.repository }}:$PACKAGE_VERSION
+            ${{ github.repository }}:${{ steps.set_version.outputs.version }}
             ${{ github.repository }}:${{ inputs.environment }}

@@ -6,6 +6,9 @@ on:
       package-path:
         required: false
         type: string
+      dockerfile-path:
+        required: true
+        type: string
       solution-file:
         required: true
         type: string

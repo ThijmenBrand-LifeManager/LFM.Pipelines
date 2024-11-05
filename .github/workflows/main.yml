@@ -78,7 +78,7 @@ jobs:
     name: Test application
     uses: ./.github/workflows/test.yml
     with:
-      dotnet-version: ${{ env.DOTNET_VERSION }}
+      dotnet-version: "8.0.x"
       solution-file: ${{ inputs.solution-file }}
 
   analyse-application:

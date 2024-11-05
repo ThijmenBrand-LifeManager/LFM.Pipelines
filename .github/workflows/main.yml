@@ -55,7 +55,7 @@ jobs:
 
   deploy-to-dev:
     needs: build
-    if: inputs.force-release-dev == true
+    if: inputs.force-release-dev == true && inputs.dockerfile-path != null
     name: Deploy to dev
     uses: ./.github/workflows/build-docker-image.yml
     with:
@@ -140,7 +140,7 @@ jobs:
     secrets: inherit
 
   deploy-to-qa:
-    if: github.event_name == 'release' && contains(github.event.release.tag_name, 'qa')
+    if: github.event_name == 'release' && contains(github.event.release.tag_name, 'qa') && inputs.dockerfile-path != null
     needs: analyse-application
     name: Deploy to QA
     uses: ./.github/workflows/build-docker-image.yml

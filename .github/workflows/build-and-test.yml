@@ -12,6 +12,9 @@ on:
       build-configuration:
         required: true
         type: string
+      app-name:
+        required: true
+        type: string
 
 env:
   GITHUB_NAMESPACE: ThijmenBrand-LifeManager
@@ -51,4 +54,5 @@ jobs:
     uses: ./.github/workflows/sonar-qube.yml
     with:
       solution-file: ${{ inputs.solution-file }}
+      app-name: ${{ inputs.app-name }}
     secrets: inherit

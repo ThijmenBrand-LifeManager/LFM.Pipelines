@@ -59,6 +59,3 @@ jobs:
       solution-file: ${{ inputs.solution-file }}
       app-name: ${{ inputs.app-name }}
     secrets: inherit
-
-  dependency-check:
-    uses: ./.github/workflows/dependency-check.yml

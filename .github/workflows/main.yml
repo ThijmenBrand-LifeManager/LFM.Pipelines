@@ -9,6 +9,9 @@ on:
       solution-file:
         required: true
         type: string
+      app-name:
+        required: false
+        type: string
       force-release-dev:
         required: false
         type: boolean
@@ -16,6 +19,7 @@ on:
 env:
   GITHUB_NAMESPACE: ThijmenBrand-LifeManager
   GITHUB_USERNAME: ThijmenBrand
+  DOTNET_VERSION: "8.0.x"
 
 jobs:
   build:
@@ -28,7 +32,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: "8.0.x"
+          dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Add GitHub NuGet package registry
         run: dotnet nuget add source https://nuget.pkg.github.com/${{ env.GITHUB_NAMESPACE }}/index.json --name github --username ${{ env.GITHUB_USERNAME }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text
@@ -98,3 +102,33 @@ jobs:
 
       - name: Push packages
         run: dotnet nuget push ./nupkg/*.nupkg --source github --api-key ${{ secrets.PACKAGE_TOKEN_SECRET }}
+
+  test-application:
+    needs: build
+    name: Test application
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifact
+
+      - name: Test the project
+        run: dotnet test ${{ inputs.solution-file }} --configuration Release --no-build --no-restore --results-directory "TestResults-${{ env.DOTNET_VERSION }}"
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        with:
+          name: dotnet-test-results-${{ env.DOTNET_VERSION }}
+          path: TestResults-${{ env.DOTNET_VERSION }}
+        if: ${{ always() }}
+
+  analyse-application:
+    needs: test-application
+    name: Analyse application
+    uses: ./.github/workflows/sonar-qube.yml
+    with:
+      solution-file: ${{ inputs.solution-file }}
+      app-name: ${{ inputs.app-name }}
+    secrets: inherit

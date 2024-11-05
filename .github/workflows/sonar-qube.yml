@@ -1,7 +1,6 @@
 name: SonarQube
 
 on:
-  push:
   workflow_call:
     inputs:
       solution-file:

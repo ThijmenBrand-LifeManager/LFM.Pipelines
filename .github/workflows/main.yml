@@ -1,0 +1,89 @@
+name: Master pipeline
+
+on:
+  workflow_call:
+    inputs:
+      publish-package:
+        type: boolean
+        default: false
+      package-path:
+        required: false
+        type: string
+      solution-file:
+        required: true
+        type: string
+
+env:
+  GITHUB_NAMESPACE: ThijmenBrand-LifeManager
+  GITHUB_USERNAME: ThijmenBrand
+
+jobs:
+  build:
+    name: Build the project
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Add GitHub NuGet package registry
+        run: dotnet nuget add source https://nuget.pkg.github.com/${{ env.GITHUB_NAMESPACE }}/index.json --name github --username ${{ env.GITHUB_USERNAME }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text
+
+      - name: Restore NuGet packages
+        run: dotnet restore ${{ inputs.solution-file }}
+
+      #build the project
+      - name: Build the project
+        run: dotnet build ${{ inputs.solution-file }} --no-restore --configuration Release --output ./build
+
+      - name: Publish build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifact
+          path: ./build
+
+  setup-package-release:
+    needs: build
+    if: inputs.package-path != null
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.matrix.outputs.value }}
+    steps:
+      - id: matrix
+        run: |
+          package_paths="${{ inputs.package-path }}"
+          package_paths_array=$(echo "$package_paths" | awk 'BEGIN{ORS=""; print "["} {gsub(/"/, "\\\""); printf "\"%s\", ", $0} END{print "]"}' | sed 's/, ]/]/')
+          echo "value=$package_paths_array" >> $GITHUB_OUTPUT
+      - run: |
+          echo "${{ steps.matrix.outputs.value }}"
+
+  publish-package:
+    needs: setup-package-release
+    if: inputs.package-path != null
+    name: Publish package
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        value: ${{ fromJson(needs.setup-package-release.outputs.matrix) }}
+
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifact
+
+      - name: Set version
+        id: set_version
+        run: |
+          echo "version=$(date +'%Y.%m.%d').$(echo $GITHUB_RUN_NUMBER | cut -c1-7)" >> "$GITHUB_OUTPUT"
+
+      #pack the project
+      - name: NuGet pack
+        run: dotnet pack ${{ matrix.value }} --output ./nupkg -p:PackageVersion=${{ steps.set_version.outputs.version }} -p:Configuration=Release
+
+      - name: Push packages
+        run: dotnet nuget push ./nupkg/*.nupkg --source github --api-key ${{ secrets.PACKAGE_TOKEN_SECRET }}

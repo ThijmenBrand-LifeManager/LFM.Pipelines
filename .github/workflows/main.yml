@@ -7,7 +7,7 @@ on:
         required: false
         type: string
       dockerfile-path:
-        required: true
+        required: false
         type: string
       solution-file:
         required: true

@@ -44,7 +44,7 @@ jobs:
         run: dotnet build ${{ inputs.solution-file }} --no-restore --configuration ${{ inputs.build-configuration }}
 
       - name: Test the project
-        run: dotnet test ${{ inputs.solution-file }} --no-build --no-restore --results-directory "TestResults-${{ inputs.dotnet-version }}"
+        run: dotnet test ${{ inputs.solution-file }} --configuration Release --no-build --no-restore --results-directory "TestResults-${{ inputs.dotnet-version }}"
 
       - name: Setup Snyk
         uses: snyk/actions/setup@master

@@ -53,6 +53,15 @@ jobs:
           name: build-artifact
           path: .
 
+  publish-package:
+    if: inputs.package-path != null
+    needs: build
+    name: Publish package
+    uses: ./.github/workflows/publish-package.yml
+    with:
+      package-path: ${{ inputs.package-path }}
+    secrets: inherit
+
   deploy-to-dev:
     needs: build
     if: inputs.force-release-dev == true && inputs.dockerfile-path != null
@@ -60,75 +69,17 @@ jobs:
     uses: ./.github/workflows/build-docker-image.yml
     with:
       project-path: ${{ inputs.solution-file }}
-      dockerfile-path: ${{ inputs.solution-file }}
+      dockerfile-path: ${{ inputs.dockerfile-path }}
       environment: dev
     secrets: inherit
-
-  setup-package-release:
-    needs: build
-    if: inputs.package-path != null
-    runs-on: ubuntu-latest
-    outputs:
-      matrix: ${{ steps.matrix.outputs.value }}
-    steps:
-      - id: matrix
-        run: |
-          package_paths="${{ inputs.package-path }}"
-          package_paths_array=$(echo "$package_paths" | awk 'BEGIN{ORS=""; print "["} {gsub(/"/, "\\\""); printf "\"%s\", ", $0} END{print "]"}' | sed 's/, ]/]/')
-          echo "value=$package_paths_array" >> $GITHUB_OUTPUT
-      - run: |
-          echo "${{ steps.matrix.outputs.value }}"
-
-  publish-package:
-    needs: setup-package-release
-    if: inputs.package-path != null
-    name: Publish package
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        value: ${{ fromJson(needs.setup-package-release.outputs.matrix) }}
-
-    steps:
-      - name: Download build artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: build-artifact
-
-      - name: Set version
-        id: set_version
-        run: |
-          echo "version=$(date +'%Y.%m.%d').$(echo $GITHUB_RUN_NUMBER | cut -c1-7)" >> "$GITHUB_OUTPUT"
-
-      - name: Add GitHub NuGet package registry
-        run: dotnet nuget add source https://nuget.pkg.github.com/${{ env.GITHUB_NAMESPACE }}/index.json --name github --username ${{ env.GITHUB_USERNAME }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text
-
-      #pack the project
-      - name: NuGet pack
-        run: dotnet pack ${{ matrix.value }} --output ./nupkg -p:PackageVersion=${{ steps.set_version.outputs.version }} -p:Configuration=Release
-
-      - name: Push packages
-        run: dotnet nuget push ./nupkg/*.nupkg --source github --api-key ${{ secrets.PACKAGE_TOKEN_SECRET }}
 
   test-application:
     needs: build
     name: Test application
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Download build artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: build-artifact
-
-      - name: Test the project
-        run: dotnet test ${{ inputs.solution-file }} --configuration Release --no-build --no-restore --results-directory "TestResults-${{ env.DOTNET_VERSION }}"
-
-      - name: Upload test results
-        uses: actions/upload-artifact@v4
-        with:
-          name: dotnet-test-results-${{ env.DOTNET_VERSION }}
-          path: TestResults-${{ env.DOTNET_VERSION }}
-        if: ${{ always() }}
+    uses: ./.github/workflows/test.yml
+    with:
+      dotnet-version: ${{ env.DOTNET_VERSION }}
+      solution-file: ${{ inputs.solution-file }}
 
   analyse-application:
     needs: test-application
@@ -156,7 +107,7 @@ jobs:
     uses: ./.github/workflows/build-docker-image.yml
     with:
       project-path: ${{ inputs.solution-file }}
-      dockerfile-path: ${{ inputs.solution-file }}
+      dockerfile-path: ${{ inputs.dockerfile-path }}
       environment: production
     secrets: inherit
 
@@ -167,7 +118,7 @@ jobs:
     uses: ./.github/workflows/build-docker-image.yml
     with:
       project-path: ${{ inputs.solution-file }}
-      dockerfile-path: ${{ inputs.solution-file }}
+      dockerfile-path: ${{ inputs.dockerfile-path }}
       environment: qa
     secrets: inherit
 
@@ -178,6 +129,6 @@ jobs:
     uses: ./.github/workflows/build-docker-image.yml
     with:
       project-path: ${{ inputs.solution-file }}
-      dockerfile-path: ${{ inputs.solution-file }}
+      dockerfile-path: ${{ inputs.dockerfile-path }}
       environment: staging
     secrets: inherit

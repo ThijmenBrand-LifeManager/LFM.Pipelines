@@ -9,6 +9,9 @@ on:
       solution-file:
         required: true
         type: string
+      force-release-dev:
+        required: false
+        type: boolean
 
 env:
   GITHUB_NAMESPACE: ThijmenBrand-LifeManager
@@ -42,6 +45,17 @@ jobs:
         with:
           name: build-artifact
           path: .
+
+  deploy-to-dev:
+    needs: build
+    if: inputs.force-release-dev == true
+    name: Deploy to dev
+    uses: ./.github/workflows/build-docker-image.yml
+    with:
+      project-path: ${{ inputs.solution-file }}
+      dockerfile-path: ${{ inputs.solution-file }}
+      environment: dev
+    secrets: inherit
 
   setup-package-release:
     needs: build

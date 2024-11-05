@@ -70,7 +70,7 @@ jobs:
 
   deploy-to-dev:
     needs: build
-    if: inputs.force-release-dev == true && inputs.dockerfile-path != null
+    if: (inputs.force-release-dev == true || github.ref == 'refs/heads/develop') && inputs.dockerfile-path != null
     name: Deploy to dev
     uses: ./.github/workflows/build-docker-image.yml
     with:

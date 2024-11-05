@@ -129,9 +129,20 @@ jobs:
 
   analyse-application:
     needs: test-application
-    name: Analyse application
+    name: SAST
     uses: ./.github/workflows/sonar-qube.yml
     with:
       solution-file: ${{ inputs.solution-file }}
       app-name: ${{ inputs.app-name }}
+    secrets: inherit
+
+  deploy-to-qa:
+    if: github.event_name == 'release' && contains(github.event.release.tag_name, 'qa')
+    needs: analyse-application
+    name: Deploy to QA
+    uses: ./.github/workflows/build-docker-image.yml
+    with:
+      project-path: ${{ inputs.solution-file }}
+      dockerfile-path: ${{ inputs.solution-file }}
+      environment: qa
     secrets: inherit

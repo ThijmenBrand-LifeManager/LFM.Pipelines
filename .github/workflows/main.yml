@@ -139,6 +139,27 @@ jobs:
       app-name: ${{ inputs.app-name }}
     secrets: inherit
 
+  run-dast:
+    if: github.event_name == 'release' && github.ref == 'refs/heads/release'
+    needs: analyse-application
+    name: DAST
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: DAST
+        run: echo "DAST"
+
+  release-to-production:
+    if: github.event_name == 'release' && github.ref == 'refs/heads/release' && inputs.dockerfile-path != null
+    needs: run-dast
+    name: Deploy to Production
+    uses: ./.github/workflows/build-docker-image.yml
+    with:
+      project-path: ${{ inputs.solution-file }}
+      dockerfile-path: ${{ inputs.solution-file }}
+      environment: production
+    secrets: inherit
+
   deploy-to-qa:
     if: github.event_name == 'release' && contains(github.event.release.tag_name, 'qa') && inputs.dockerfile-path != null
     needs: analyse-application
@@ -159,25 +180,4 @@ jobs:
       project-path: ${{ inputs.solution-file }}
       dockerfile-path: ${{ inputs.solution-file }}
       environment: staging
-    secrets: inherit
-
-  run-dast:
-    if: github.event_name == 'release' && github.ref == 'refs/heads/release'
-    needs: analyse-application
-    name: DAST
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: DAST
-        run: echo "DAST"
-
-  release-to-production:
-    if: github.event_name == 'release' && github.ref == 'refs/heads/release' && inputs.dockerfile-path != null
-    needs: run-dast
-    name: Deploy to Production
-    uses: ./.github/workflows/build-docker-image.yml
-    with:
-      project-path: ${{ inputs.solution-file }}
-      dockerfile-path: ${{ inputs.solution-file }}
-      environment: production
     secrets: inherit

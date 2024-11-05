@@ -12,8 +12,6 @@ on:
     secrets:
       SONAR_TOKEN:
         required: true
-      GITHUB_TOKEN:
-        required: true
       PACKAGE_TOKEN_SECRET:
         required: true
 

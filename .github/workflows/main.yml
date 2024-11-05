@@ -96,6 +96,9 @@ jobs:
         run: |
           echo "version=$(date +'%Y.%m.%d').$(echo $GITHUB_RUN_NUMBER | cut -c1-7)" >> "$GITHUB_OUTPUT"
 
+      - name: Add GitHub NuGet package registry
+        run: dotnet nuget add source https://nuget.pkg.github.com/${{ env.GITHUB_NAMESPACE }}/index.json --name github --username ${{ env.GITHUB_USERNAME }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text
+
       #pack the project
       - name: NuGet pack
         run: dotnet pack ${{ matrix.value }} --output ./nupkg -p:PackageVersion=${{ steps.set_version.outputs.version }} -p:Configuration=Release

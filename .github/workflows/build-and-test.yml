@@ -15,6 +15,9 @@ on:
       app-name:
         required: true
         type: string
+    secrets:
+      PACKAGE_TOKEN_SECRET:
+        required: true
 
 env:
   GITHUB_NAMESPACE: ThijmenBrand-LifeManager

@@ -3,9 +3,6 @@ name: Master pipeline
 on:
   workflow_call:
     inputs:
-      publish-package:
-        type: boolean
-        default: false
       package-path:
         required: false
         type: string

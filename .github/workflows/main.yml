@@ -12,6 +12,9 @@ on:
       solution-file:
         required: true
         type: string
+      project-path:
+        required: true
+        type: string
       app-name:
         required: false
         type: string
@@ -71,7 +74,7 @@ jobs:
     name: Deploy to dev
     uses: ./.github/workflows/build-docker-image.yml
     with:
-      project-path: ${{ inputs.solution-file }}
+      project-path: ${{ inputs.project-path }}
       dockerfile-path: ${{ inputs.dockerfile-path }}
       environment: dev
     secrets: inherit
@@ -109,7 +112,7 @@ jobs:
     name: Deploy to Production
     uses: ./.github/workflows/build-docker-image.yml
     with:
-      project-path: ${{ inputs.solution-file }}
+      project-path: ${{ inputs.project-path }}
       dockerfile-path: ${{ inputs.dockerfile-path }}
       environment: production
     secrets: inherit
@@ -120,7 +123,7 @@ jobs:
     name: Deploy to QA
     uses: ./.github/workflows/build-docker-image.yml
     with:
-      project-path: ${{ inputs.solution-file }}
+      project-path: ${{ inputs.project-path }}
       dockerfile-path: ${{ inputs.dockerfile-path }}
       environment: qa
     secrets: inherit
@@ -131,7 +134,7 @@ jobs:
     name: Deploy to Staging
     uses: ./.github/workflows/build-docker-image.yml
     with:
-      project-path: ${{ inputs.solution-file }}
+      project-path: ${{ inputs.project-path }}
       dockerfile-path: ${{ inputs.dockerfile-path }}
       environment: staging
     secrets: inherit

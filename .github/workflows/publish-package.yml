@@ -6,6 +6,17 @@ on:
       package-path:
         required: true
         type: string
+      direct-call:
+        required: false
+        type: boolean
+        default: false
+      solution-file:
+        required: false
+        type: string
+      dotnet-version:
+        required: false
+        type: string
+        default: "8.0.x"
 
 env:
   GITHUB_NAMESPACE: ThijmenBrand-LifeManager
@@ -35,9 +46,32 @@ jobs:
 
     steps:
       - name: Download build artifact
+        if: ${{ !inputs.direct-call }}
         uses: actions/download-artifact@v4
         with:
           name: build-artifact
+
+      - uses: actions/checkout@v2
+        if: ${{ inputs.direct-call }}
+
+      - name: Setup .NET
+        if: ${{ inputs.direct-call }}
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: ${{ inputs.dotnet-version }}
+
+      - name: Add GitHub NuGet package registry
+        if: ${{ inputs.direct-call }}
+        run: dotnet nuget add source https://nuget.pkg.github.com/${{ env.GITHUB_NAMESPACE }}/index.json --name github --username ${{ env.GITHUB_USERNAME }} --password ${{ secrets.PACKAGE_TOKEN_SECRET }} --store-password-in-clear-text
+
+      - name: Restore NuGet packages
+        if: ${{ inputs.direct-call }}
+        run: dotnet restore ${{ inputs.solution-file }}
+
+      #build the project
+      - name: Build the project
+        if: ${{ inputs.direct-call }}
+        run: dotnet build ${{ inputs.solution-file }} --no-restore --configuration Release
 
       - name: Set version
         id: set_version

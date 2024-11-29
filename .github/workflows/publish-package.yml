@@ -62,7 +62,7 @@ jobs:
 
       - name: Add GitHub NuGet package registry
         if: ${{ inputs.direct-call }}
-        run: dotnet nuget add source https://nuget.pkg.github.com/${{ env.GITHUB_NAMESPACE }}/index.json --name github --username ${{ env.GITHUB_USERNAME }} --password ${{ secrets.PACKAGE_TOKEN_SECRET }} --store-password-in-clear-text
+        run: dotnet nuget add source https://nuget.pkg.github.com/${{ env.GITHUB_NAMESPACE }}/index.json --name github-package-registry --username ${{ env.GITHUB_USERNAME }} --password ${{ secrets.PACKAGE_TOKEN_SECRET }} --store-password-in-clear-text
 
       - name: Restore NuGet packages
         if: ${{ inputs.direct-call }}

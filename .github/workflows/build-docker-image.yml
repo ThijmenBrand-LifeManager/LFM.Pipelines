@@ -104,7 +104,9 @@ jobs:
           fail-build: true
           output-format: sarif
 
+          #make this always run
       - name: Upload Anchore Scan SARIF Report
+        if: always()
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: ${{ steps.scan.outputs.sarif }}

@@ -27,6 +27,9 @@ env:
   PACKAGE_VERSION: $(date +'%Y.%m.%d').$(echo $GITHUB_RUN_NUMBER | cut -c1-7)
   REGISTRY: ghcr.io
 
+permissions:
+  actions: read
+
 jobs:
   setup:
     runs-on: ubuntu-latest

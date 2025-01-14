@@ -96,26 +96,15 @@ jobs:
             NUGET_PAT=${{ secrets.PACKAGE_TOKEN_SECRET}}
             NUGET_USER=${{ github.actor }}
 
-      - name: Docker Scout CVEs
-        uses: docker/scout-action@v1.16.1
+            - name: Scan Image
+      - uses: anchore/scan-action@v6
+        id: scan
         with:
-          command: quickview,cves
           image: ${{ env.REGISTRY }}/${{ env.REPO }}/${{ steps.set_image_name.outputs.image_name }}:${{ inputs.environment }}
+          fail-build: true
+          output-format: sarif
 
-      - name: Docker Scout SBOM
-        uses: docker/scout-action@v1.16.1
-        with:
-          command: sbom
-          image: ${{ env.REGISTRY }}/${{ env.REPO }}/${{ steps.set_image_name.outputs.image_name }}:${{ inputs.environment }}
-          output: sbom.json
-
-      - name: Docker Scout recommendations
-        uses: docker/scout-action@v1.16.1
-        with:
-          command: recommendations
-          image: ${{ env.REGISTRY }}/${{ env.REPO }}/${{ steps.set_image_name.outputs.image_name }}:${{ inputs.environment }}
-
-      - name: Upload Docker Scout SARIF Report
+      - name: Upload Anchore Scan SARIF Report
         uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: scout.sarif
+          sarif_file: ${{ steps.scan.outputs.sarif }}
